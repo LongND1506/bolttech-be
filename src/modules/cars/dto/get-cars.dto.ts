@@ -1,20 +1,20 @@
-import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional, ApiResponseProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional } from 'class-validator';
 
 export class CarsQueryDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
   startDate?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
   endDate?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
-  isAvailable?: boolean;
+  isAvailableOnly?: boolean;
 }
 
 export class CarDto {

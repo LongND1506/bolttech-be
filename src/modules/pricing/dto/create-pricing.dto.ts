@@ -8,11 +8,11 @@ export class CreatePricingDto {
   })
   @IsNotEmpty()
   @IsEnum(Season)
-  pricingName: Season;
+  season: Season;
 
   @ApiProperty()
   @IsNotEmpty()
-  value: number;
+  price: number;
 
   @ApiProperty()
   @IsNotEmpty()

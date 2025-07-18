@@ -22,7 +22,7 @@ export class BookingController {
 
   @ApiOperation({ summary: 'Get All Bookings' })
   @ApiResponse({
-    type: CreateBookingResponseDto,
+    type: BookingDto,
     status: 200,
     isArray: true,
   })
@@ -33,7 +33,7 @@ export class BookingController {
 
   @ApiOperation({ summary: 'Get Booking By Id' })
   @ApiResponse({
-    type: CreateBookingResponseDto,
+    type: BookingDto,
     status: 200,
   })
   @Get(':id')

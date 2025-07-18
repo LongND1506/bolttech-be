@@ -5,7 +5,7 @@ import { DEFAULT_PORT, provideSwaggerConfig } from './shared';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
+  app.enableCors();
   provideSwaggerConfig(app);
 
   await app.listen(process.env.PORT ?? DEFAULT_PORT);

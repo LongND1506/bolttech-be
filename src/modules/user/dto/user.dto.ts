@@ -1,21 +1,16 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { BookingEntity } from '../booking.entity';
+import { UserRole } from '../enums';
+import { UserEntity } from '../user.entity';
 
-export class BookingDto {
+export class UserDto {
   @ApiResponseProperty()
   id: string;
-
-  @ApiResponseProperty()
-  totalPrice: number;
 
   @ApiResponseProperty()
   email: string;
 
   @ApiResponseProperty()
-  startDate: string;
-
-  @ApiResponseProperty()
-  endDate: string;
+  role: UserRole;
 
   @ApiResponseProperty()
   drivingLicense: string;
@@ -23,13 +18,12 @@ export class BookingDto {
   @ApiResponseProperty()
   drivingLicenseExpiry: string;
 
-  constructor(entity: BookingEntity) {
+  constructor(entity: UserEntity) {
+    console.log(entity);
     this.id = entity.id;
     this.email = entity.email;
+    this.role = entity.role;
     this.drivingLicense = entity.drivingLicense;
     this.drivingLicenseExpiry = entity.drivingLicenseExpiry.toISOString();
-    this.startDate = entity.startDate.toISOString();
-    this.endDate = entity.endDate.toISOString();
-    this.totalPrice = entity.totalPrice;
   }
 }

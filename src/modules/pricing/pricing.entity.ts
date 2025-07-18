@@ -8,13 +8,13 @@ export class PricingEntity {
   @IsNotEmpty()
   @IsEnum(Season)
   @PrimaryColumn()
-  pricingName: Season;
+  season: Season;
 
   @IsNotEmpty()
   @Column({
     type: 'decimal',
   })
-  value: number;
+  price: number;
 
   @ManyToOne(() => CarEntity)
   @JoinColumn({

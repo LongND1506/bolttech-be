@@ -1,11 +1,12 @@
 import { BookingEntity } from '@/modules/bookings';
 import { CarEntity } from '@/modules/cars';
 import { PricingEntity } from '@/modules/pricing';
+import { UserEntity } from '@/modules/user';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-const ENTITIES = [CarEntity, PricingEntity, BookingEntity];
+const ENTITIES = [CarEntity, PricingEntity, BookingEntity, UserEntity];
 const DEP_SERVICES = [ConfigService];
 
 @Module({

@@ -57,6 +57,7 @@ export class BookingService {
         totalPrice,
       });
       const result = await this._bookingRepository.insert(record);
+      await this._carRepository.update({ id: carId }, { stock: car.stock - 1 });
 
       return new CreateBookingResponseDto(result.raw['insertId']);
     } catch (error) {

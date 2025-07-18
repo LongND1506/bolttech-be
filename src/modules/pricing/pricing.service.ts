@@ -52,9 +52,9 @@ export class PricingService {
 
     const total = numberOfDates.reduce((acc, element) => {
       const season = this.getCurrentSeason(element);
-      const price = prices.find((p) => p.pricingName === season);
+      const price = prices.find((p) => p.season === season);
 
-      return price ? acc + price.value : acc;
+      return price ? acc + price.price : acc;
     }, 0);
 
     return Number(total.toFixed(2));

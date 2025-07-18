@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsDate, IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { CarEntity } from '../cars';
 
@@ -27,10 +27,12 @@ export class BookingEntity {
   drivingLicenseExpiry: Date;
 
   @IsNotEmpty()
+  @IsDate()
   @Column()
   startDate: Date;
 
   @IsNotEmpty()
+  @IsDate()
   @Column()
   endDate: Date;
 
