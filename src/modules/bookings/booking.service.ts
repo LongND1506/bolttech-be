@@ -6,10 +6,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { parseISO } from 'date-fns';
 import { Repository } from 'typeorm';
-import { CarEntity } from '../cars';
-import { PricingService } from '../pricing';
 import { BookingEntity } from './booking.entity';
 import { BookingDto, CreateBookingDto, CreateBookingResponseDto } from './dto';
+import { PricingService } from '../pricing/pricing.service';
+import { CarEntity } from '../cars/car.entity';
+import { UserDto } from '../user/dto';
 
 @Injectable()
 export class BookingService {
@@ -23,43 +24,34 @@ export class BookingService {
 
   async createBooking(
     payload: CreateBookingDto,
+    userDto: UserDto,
   ): Promise<CreateBookingResponseDto> {
     try {
-      const {
-        email,
-        carId,
-        startDate,
-        endDate,
-        drivingLicense,
-        drivingLicenseExpiry,
-      } = payload;
+      const { carId, startDate, endDate } = payload;
 
       const start = parseISO(startDate);
       const end = parseISO(endDate);
-      const expiry = parseISO(drivingLicenseExpiry);
       const car = await this._carRepository.findOneBy({ id: carId });
 
       if (!car?.stock)
         throw new NotFoundException('Selected Car is not available');
 
-      const totalPrice = this._pricingService.getTotalPrice(
+      const totalPrice = await this._pricingService.getTotalPrice(
         start,
         end,
-        car.prices,
+        car.id,
       );
       const record = this._bookingRepository.create({
-        carId,
-        email,
-        drivingLicense,
+        car,
+        user: userDto,
         startDate: start,
         endDate: end,
-        drivingLicenseExpiry: expiry,
         totalPrice,
       });
-      const result = await this._bookingRepository.insert(record);
+      const result = await this._bookingRepository.save(record);
       await this._carRepository.update({ id: carId }, { stock: car.stock - 1 });
 
-      return new CreateBookingResponseDto(result.raw['insertId']);
+      return new CreateBookingResponseDto(result.id);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

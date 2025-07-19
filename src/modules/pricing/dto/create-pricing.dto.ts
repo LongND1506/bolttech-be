@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { Season } from '../season.enum';
+import { CarDto } from '@/modules/cars/dto';
 
 export class CreatePricingDto {
   @ApiProperty({
@@ -14,7 +15,9 @@ export class CreatePricingDto {
   @IsNotEmpty()
   price: number;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  carId: string;
+  @ApiProperty({
+    required: false,
+  })
+  @IsOptional()
+  car?: Partial<CarDto>;
 }

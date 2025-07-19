@@ -7,7 +7,7 @@ import {
 } from 'date-fns';
 import { PricingEntity } from './pricing.entity';
 import { Season } from './season.enum';
-import { CreatePricingDto } from './dto';
+import { CreatePricingDto } from './dto/create-pricing.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -40,31 +40,35 @@ export class PricingService {
     return Season.Off;
   }
 
-  getTotalPrice(
+  async getTotalPrice(
     startDate: Date,
     endDate: Date,
-    prices: PricingEntity[],
-  ): number {
+    cardId: string,
+  ): Promise<number> {
     //Calculate array of dates between startDate and endDate
     const numberOfDates = isEqual(startDate, endDate)
       ? [startDate]
       : eachDayOfInterval({ start: startDate, end: endDate });
+    let total = 0;
 
-    const total = numberOfDates.reduce((acc, element) => {
-      const season = this.getCurrentSeason(element);
-      const price = prices.find((p) => p.season === season);
-
-      return price ? acc + price.price : acc;
-    }, 0);
+    for (const date of numberOfDates) {
+      const season = this.getCurrentSeason(date);
+      const price = await this._pricingRepository.findOneBy({
+        season,
+        car: { id: cardId },
+      });
+      console.log(price);
+      total += price ? Number(price.price) : 0;
+    }
 
     return Number(total.toFixed(2));
   }
 
-  getAveragePricePerDay(
+  async getAveragePricePerDay(
     startDate: Date,
     endDate: Date,
-    prices: PricingEntity[],
-  ): number {
+    cardId: string,
+  ): Promise<number> {
     const dates = isEqual(startDate, endDate)
       ? [startDate]
       : eachDayOfInterval({ start: startDate, end: subDays(endDate, 1) });
@@ -73,7 +77,7 @@ export class PricingService {
       return 0;
     }
 
-    const total = this.getTotalPrice(startDate, endDate, prices);
+    const total = await this.getTotalPrice(startDate, endDate, cardId);
     return Number((total / dates.length).toFixed(2));
   }
 

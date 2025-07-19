@@ -3,8 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from '../user';
 import { AuthService } from './auth.service';
+import { UserEntity } from '../user/user.entity';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: 30 },
+        signOptions: { expiresIn: '2h' },
       }),
       global: true,
     }),

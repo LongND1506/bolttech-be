@@ -1,7 +1,5 @@
-import { PricingEntity } from '../pricing';
-import { Type } from 'class-transformer';
-import { IsNotEmpty, Min, ValidateNested } from 'class-validator';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { IsNotEmpty, Min } from 'class-validator';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class CarEntity {
@@ -21,9 +19,4 @@ export class CarEntity {
     type: 'int',
   })
   stock: number;
-
-  @ValidateNested({ each: true })
-  @Type(() => PricingEntity)
-  @OneToMany(() => PricingEntity, (pricing) => pricing.car)
-  prices: PricingEntity[];
 }

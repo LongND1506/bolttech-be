@@ -9,25 +9,13 @@ export class BookingDto {
   totalPrice: number;
 
   @ApiResponseProperty()
-  email: string;
-
-  @ApiResponseProperty()
   startDate: string;
 
   @ApiResponseProperty()
   endDate: string;
 
-  @ApiResponseProperty()
-  drivingLicense: string;
-
-  @ApiResponseProperty()
-  drivingLicenseExpiry: string;
-
   constructor(entity: BookingEntity) {
     this.id = entity.id;
-    this.email = entity.email;
-    this.drivingLicense = entity.drivingLicense;
-    this.drivingLicenseExpiry = entity.drivingLicenseExpiry.toISOString();
     this.startDate = entity.startDate.toISOString();
     this.endDate = entity.endDate.toISOString();
     this.totalPrice = entity.totalPrice;

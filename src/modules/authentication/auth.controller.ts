@@ -1,8 +1,16 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { SignInDto, SignInResponseDto } from './dto';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { CreateUserDto, CurrentUserDto, UserDto } from '../user';
+import { AuthGuard } from './auth.guard';
+import { CreateUserDto, CurrentUserDto, UserDto } from '../user/dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +32,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({ status: 200, type: CurrentUserDto })
+  @UseGuards(AuthGuard)
   @Get('user-profile')
   getUserProfile(
     @Headers('Authorization') authHeader: string,

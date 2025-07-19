@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CarService } from './car.service';
 import {
@@ -7,6 +7,7 @@ import {
   CreateCarDto,
   CreateCarResponseDto,
 } from './dto';
+import { AuthGuard } from '../authentication/auth.guard';
 
 @ApiTags('cars')
 @Controller('cars')
@@ -15,6 +16,7 @@ export class CarController {
 
   @ApiOperation({ summary: 'Get available cars' })
   @ApiResponse({ type: CarDto, isArray: true, status: 200 })
+  @UseGuards(AuthGuard)
   @Get()
   async getCars(@Query() payload: CarsQueryDto): Promise<CarDto[]> {
     return this._carService.getCars(payload);
@@ -22,6 +24,7 @@ export class CarController {
 
   @ApiOperation({ summary: 'Create a new car' })
   @ApiResponse({ type: CarDto, isArray: true, status: 200 })
+  // @UseGuards(AuthGuard)
   @Post()
   async createCar(
     @Body() payload: CreateCarDto,

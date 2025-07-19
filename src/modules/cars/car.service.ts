@@ -2,14 +2,14 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parseISO } from 'date-fns';
 import { Repository } from 'typeorm';
-import { PricingService } from '../pricing';
 import { CarEntity } from './car.entity';
 import {
-  CarsQueryDto,
   CarDto,
+  CarsQueryDto,
   CreateCarDto,
   CreateCarResponseDto,
 } from './dto';
+import { PricingService } from '../pricing/pricing.service';
 
 @Injectable()
 export class CarService {
@@ -39,28 +39,30 @@ export class CarService {
 
     const startDateISO = parseISO(startDate);
     const endDateISO = parseISO(endDate);
+    const result = <CarDto[]>[];
 
-    const res = cars?.map(
-      (car) =>
-        new CarDto({
-          id: car.id,
-          brand: car.brand,
-          modelName: car.modelName,
-          stock: car.stock,
-          averagePricePerDay: this._pricingService.getAveragePricePerDay(
-            startDateISO,
-            endDateISO,
-            car.prices,
-          ),
-          totalPrice: this._pricingService.getTotalPrice(
-            startDateISO,
-            endDateISO,
-            car.prices,
-          ),
-        }),
-    );
+    for (const car of cars) {
+      const res = new CarDto({
+        id: car.id,
+        brand: car.brand,
+        modelName: car.modelName,
+        stock: car.stock,
+        averagePricePerDay: await this._pricingService.getAveragePricePerDay(
+          startDateISO,
+          endDateISO,
+          car.id,
+        ),
+        totalPrice: await this._pricingService.getTotalPrice(
+          startDateISO,
+          endDateISO,
+          car.id,
+        ),
+      });
 
-    return res;
+      result.push(res);
+    }
+
+    return result;
   }
 
   async createCar(payload: CreateCarDto): Promise<CreateCarResponseDto> {
@@ -72,18 +74,19 @@ export class CarService {
         modelName,
         stock,
       });
-      const result = await this._carRepository.insert(record);
-      const carId = result.raw['insertId'];
+      const result = await this._carRepository.save(record);
 
       await this._pricingService.createNewPricing(
         pricings?.map((pr) => ({
           ...pr,
-          carId: pr.carId ?? carId,
+          car: {
+            ...result,
+          },
         })),
       );
 
       return {
-        id: carId,
+        id: result.id,
       };
     } catch (error) {
       throw new InternalServerErrorException(error);

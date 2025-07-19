@@ -1,30 +1,33 @@
-import { IsDate, IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { CarEntity } from '../cars';
+import { IsDate, IsNotEmpty } from 'class-validator';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { CarEntity } from '../cars/car.entity';
+import { UserEntity } from '../user/user.entity';
 
 @Entity()
 export class BookingEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsNotEmpty()
-  @Column()
-  @IsUUID()
   @OneToOne(() => CarEntity, (car) => car.id)
-  carId: string;
+  @JoinColumn({
+    name: 'car_id',
+    referencedColumnName: 'id',
+  })
+  car: CarEntity;
 
   @IsNotEmpty()
-  @IsEmail()
-  @Column()
-  email: string;
-
-  @IsNotEmpty()
-  @Column()
-  drivingLicense: string;
-
-  @IsNotEmpty()
-  @Column()
-  drivingLicenseExpiry: Date;
+  @OneToOne(() => UserEntity, (user) => user.id)
+  @JoinColumn({
+    name: 'user_id',
+    referencedColumnName: 'id',
+  })
+  user: UserEntity;
 
   @IsNotEmpty()
   @IsDate()

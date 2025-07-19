@@ -2,24 +2,13 @@ import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsDateString,
-  IsEmail,
   IsNotEmpty,
   IsString,
-  Length,
-  Matches,
   MinDate,
   Validate,
 } from 'class-validator';
-import {
-  DRIVING_LICENSE_MAX_LENGTH,
-  DRIVING_LICENSE_MIN_LENGTH,
-  DRIVING_LICENSE_REGEX,
-  getTomorrowDate,
-} from 'src/shared';
-import {
-  IsAfterStartDate,
-  IsValidDrivingLicenseExpiryValidator,
-} from '../validators';
+import { getTomorrowDate } from 'src/shared';
+import { IsAfterStartDate } from '../validators';
 
 export class CreateBookingDto {
   @ApiProperty()
@@ -28,26 +17,9 @@ export class CreateBookingDto {
   carId: string;
 
   @ApiProperty()
-  @IsEmail()
-  email: string;
-
-  @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @Length(DRIVING_LICENSE_MIN_LENGTH, DRIVING_LICENSE_MAX_LENGTH)
-  @Matches(DRIVING_LICENSE_REGEX, {
-    message: 'Invalid driving license',
-  })
-  @Transform((field) => (field.value as string).trim())
-  drivingLicense: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsDateString()
-  @Validate(IsValidDrivingLicenseExpiryValidator, {
-    message: 'Driving license must be valid before endDate',
-  })
-  drivingLicenseExpiry: string;
+  userId: string;
 
   @ApiProperty()
   @IsNotEmpty()

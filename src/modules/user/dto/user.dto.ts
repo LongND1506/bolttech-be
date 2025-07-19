@@ -19,7 +19,6 @@ export class UserDto {
   drivingLicenseExpiry: string;
 
   constructor(entity: UserEntity) {
-    console.log(entity);
     this.id = entity.id;
     this.email = entity.email;
     this.role = entity.role;

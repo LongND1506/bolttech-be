@@ -1,13 +1,22 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { CarEntity } from '../cars/car.entity';
 import { Season } from './season.enum';
-import { CarEntity } from '../cars';
 
 @Entity()
 export class PricingEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
   @IsNotEmpty()
   @IsEnum(Season)
-  @PrimaryColumn()
+  @Column()
   season: Season;
 
   @IsNotEmpty()
@@ -18,8 +27,8 @@ export class PricingEntity {
 
   @ManyToOne(() => CarEntity)
   @JoinColumn({
-    referencedColumnName: 'id',
     name: 'card_id',
+    referencedColumnName: 'id',
   })
   car: CarEntity;
 }

@@ -8,8 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { CreateUserDto, CurrentUserDto, UserDto, UserEntity } from '../user';
 import { SignInDto, SignInResponseDto } from './dto';
+import { UserEntity } from '../user/user.entity';
+import { CreateUserDto, CurrentUserDto, UserDto } from '../user/dto';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +46,10 @@ export class AuthService {
 
     if (!isPasswordValid) throw new UnauthorizedException('Invalid password');
 
-    const accessToken = this._jwtService.sign(user);
+    const userObj = {
+      ...new UserDto(user),
+    };
+    const accessToken = this._jwtService.sign(userObj);
 
     return {
       accessToken,
@@ -53,6 +57,8 @@ export class AuthService {
   }
 
   async getUserProfile(authHeader: string): Promise<CurrentUserDto> {
+    if (!authHeader) throw new UnauthorizedException('Unauthorized');
+
     const token = authHeader.split(' ')[1];
     const data = this._jwtService.decode(token);
     const user = await this._userRepository.findOneBy({ email: data.email });

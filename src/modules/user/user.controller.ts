@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserDto } from './dto';
 import { UserService } from './user.service';
+import { AuthGuard } from '../authentication/auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -14,6 +15,7 @@ export class UserController {
     status: 200,
     isArray: true,
   })
+  @UseGuards(AuthGuard)
   @Get()
   getAllUsers(): Promise<UserDto[]> {
     return this._userService.getAllUsers();
@@ -24,6 +26,7 @@ export class UserController {
     type: UserDto,
     status: 200,
   })
+  @UseGuards(AuthGuard)
   @Get(':id')
   getUserById(@Param('id') id: string): Promise<UserDto> {
     return this._userService.getUserById(id);
@@ -34,6 +37,7 @@ export class UserController {
     type: UserDto,
     status: 200,
   })
+  @UseGuards(AuthGuard)
   @Post()
   createUser(@Body() payload: UserDto): Promise<UserDto> {
     return this._userService.createUser(payload);
