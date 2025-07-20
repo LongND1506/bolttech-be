@@ -1,18 +1,21 @@
 import {
-  isDate,
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { CreateBookingDto } from '../dto/create-booking.dto';
+import { parseISO } from 'date-fns';
 
 @ValidatorConstraint({ name: 'IsAfterStartDate' })
 export class IsAfterStartDate implements ValidatorConstraintInterface {
-  validate(currentDate: Date, args: ValidationArguments): boolean {
+  validate(currentDate: string, args: ValidationArguments): boolean {
     const obj = args.object as CreateBookingDto;
 
-    if (!isDate(currentDate) || !isDate(obj.startDate)) return false;
+    if (!currentDate || !obj.startDate) return true;
 
-    return currentDate > obj.startDate;
+    const targetDate = parseISO(currentDate);
+    const startDate = parseISO(obj.startDate);
+
+    return targetDate >= startDate;
   }
 }

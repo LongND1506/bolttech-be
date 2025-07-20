@@ -1,5 +1,7 @@
 import { IsNotEmpty, Min } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BookingEntity } from '../bookings/booking.entity';
+import { PricingEntity } from '../pricing/pricing.entity';
 
 @Entity()
 export class CarEntity {
@@ -19,4 +21,10 @@ export class CarEntity {
     type: 'int',
   })
   stock: number;
+
+  @OneToMany(() => PricingEntity, (pricing) => pricing.car)
+  pricings: PricingEntity[];
+
+  @OneToMany(() => BookingEntity, (booking) => booking.car)
+  bookings: BookingEntity[];
 }

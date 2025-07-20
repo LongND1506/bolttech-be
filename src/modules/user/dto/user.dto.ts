@@ -23,6 +23,9 @@ export class UserDto {
     this.email = entity.email;
     this.role = entity.role;
     this.drivingLicense = entity.drivingLicense;
-    this.drivingLicenseExpiry = entity.drivingLicenseExpiry.toISOString();
+    this.drivingLicenseExpiry =
+      typeof entity.drivingLicenseExpiry === 'string'
+        ? entity.drivingLicenseExpiry
+        : entity.drivingLicenseExpiry?.toISOString();
   }
 }

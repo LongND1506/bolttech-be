@@ -1,24 +1,27 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
-import { UserDto } from './user.dto';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, Length, Matches } from 'class-validator';
+import {
+  DRIVING_LICENSE_MAX_LENGTH,
+  DRIVING_LICENSE_MIN_LENGTH,
+  DRIVING_LICENSE_REGEX,
+} from '../../../shared/constants';
 
-export class CreateUserDto extends PickType(UserDto, [
-  'email',
-  'drivingLicense',
-  'drivingLicenseExpiry',
-]) {
+export class CreateUserDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
-  @ApiProperty()
   email: string;
 
   @IsNotEmpty()
-  @IsEmail()
+  @Matches(DRIVING_LICENSE_REGEX, { message: 'Invalid driving license' })
+  @Length(DRIVING_LICENSE_MIN_LENGTH, DRIVING_LICENSE_MAX_LENGTH, {
+    always: true,
+    message: 'Invalid driving license',
+  })
   @ApiProperty()
   drivingLicense: string;
 
-  @IsNotEmpty()
-  @IsEmail()
   @ApiProperty()
+  @IsNotEmpty()
   drivingLicenseExpiry: string;
 }

@@ -13,6 +13,9 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   },
   entities: ['dist/**/*.entity{.ts,.js}'],
   seeds: ['dist/infrastructures/seeds/*.seed{.ts,.js}'],
-  synchronize: true, // do not set it true in production application
+  synchronize: true,
+  extra: {
+    decimalNumbers: true,
+  }, // do not set it true in production application
 };
 export default new DataSource(dataSourceOptions);

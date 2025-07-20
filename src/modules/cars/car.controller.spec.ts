@@ -1,23 +1,31 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CarController } from './car.controller';
 import { CarService } from './car.service';
-import { CarsQueryDto, CarDto } from './dto';
+import {
+  CarDto,
+  CarsQueryDto,
+  CreateCarDto,
+  CreateCarResponseDto,
+} from './dto';
+import { JwtService } from '@nestjs/jwt';
 
 describe('CarController', () => {
   let controller: CarController;
   let carService: jest.Mocked<CarService>;
 
-  beforeEach(async () => {
-    const mockCarService = {
-      getCars: jest.fn(),
-    } as unknown as jest.Mocked<CarService>;
+  const mockCarService = {
+    getCars: jest.fn(),
+    createCar: jest.fn(),
+  } as unknown as jest.Mocked<CarService>;
 
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CarController],
       providers: [
+        { provide: CarService, useValue: mockCarService },
         {
-          provide: CarService,
-          useValue: mockCarService,
+          provide: JwtService,
+          useValue: { sign: jest.fn(), verify: jest.fn() },
         },
       ],
     }).compile();
@@ -26,44 +34,47 @@ describe('CarController', () => {
     carService = module.get(CarService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('getCars', () => {
-    it('should return an array of CarDto (no query)', async () => {
-      const result: CarDto[] = [
-        new CarDto({
+    it('should return an array of CarDto', async () => {
+      const query: CarsQueryDto = {
+        startDate: '2024-01-01',
+        endDate: '2024-01-10',
+      } as any;
+      const cars: CarDto[] = [
+        {
           id: '1',
           brand: 'Toyota',
-          modelName: 'Yaris',
-          stock: 3,
-          averagePricePerDay: 0,
-          totalPrice: 0,
-        }),
-      ];
-      carService.getCars.mockResolvedValue(result);
-      const query: CarsQueryDto = {};
-      await expect(controller.getCars(query)).resolves.toEqual(result);
-    });
-
-    it('should return an array of CarDto (with query)', async () => {
-      const result: CarDto[] = [
-        new CarDto({
-          id: '2',
-          brand: 'Toyota',
-          modelName: 'Yaris',
+          modelName: 'Corolla',
           stock: 2,
-          averagePricePerDay: 98.43,
-          totalPrice: 492.15,
-        }),
+          averagePricePerDay: 50,
+          totalPrice: 500,
+        } as CarDto,
       ];
-      const query: CarsQueryDto = {
-        startDate: '2024-06-01',
-        endDate: '2024-06-05',
-      };
-      carService.getCars.mockResolvedValue(result);
-      await expect(controller.getCars(query)).resolves.toEqual(result);
+      carService.getCars.mockResolvedValue(cars);
+
+      const result = await controller.getCars(query);
+      expect(result).toBe(cars);
+      expect(carService.getCars).toHaveBeenCalledWith(query);
+    });
+  });
+
+  describe('createCar', () => {
+    it('should create a car and return CreateCarResponseDto', async () => {
+      const payload: CreateCarDto = {
+        brand: 'Honda',
+        modelName: 'Civic',
+        stock: 3,
+      } as any;
+      const response: CreateCarResponseDto = { id: '123' } as any;
+      carService.createCar.mockResolvedValue(response);
+
+      const result = await controller.createCar(payload);
+      expect(result).toBe(response);
+      expect(carService.createCar).toHaveBeenCalledWith(payload);
     });
   });
 });

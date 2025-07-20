@@ -1,16 +1,17 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { parseISO } from 'date-fns';
 import { Repository } from 'typeorm';
+import { CarEntity } from '../cars/car.entity';
+import { PricingService } from '../pricing/pricing.service';
+import { UserDto } from '../user/dto';
 import { BookingEntity } from './booking.entity';
 import { BookingDto, CreateBookingDto, CreateBookingResponseDto } from './dto';
-import { PricingService } from '../pricing/pricing.service';
-import { CarEntity } from '../cars/car.entity';
-import { UserDto } from '../user/dto';
+import { parseISO } from 'date-fns';
 
 @Injectable()
 export class BookingService {
@@ -36,6 +37,14 @@ export class BookingService {
       if (!car?.stock)
         throw new NotFoundException('Selected Car is not available');
 
+      if (!this.checkUserValidDrivingLicense(userDto, [start, end]))
+        throw new BadRequestException(
+          'User does not have valid driving license',
+        );
+
+      if (await this.checkIsOverlap(userDto.id, start, end))
+        throw new BadRequestException('Booking is overlap');
+
       const totalPrice = await this._pricingService.getTotalPrice(
         start,
         end,
@@ -49,7 +58,13 @@ export class BookingService {
         totalPrice,
       });
       const result = await this._bookingRepository.save(record);
-      await this._carRepository.update({ id: carId }, { stock: car.stock - 1 });
+
+      if (result.id) {
+        await this._carRepository.save({
+          ...car,
+          stock: car.stock - 1,
+        });
+      }
 
       return new CreateBookingResponseDto(result.id);
     } catch (error) {
@@ -63,11 +78,46 @@ export class BookingService {
     return bookings.map((booking) => new BookingDto(booking));
   }
 
+  async getUserBookingsHistory(userId: string): Promise<BookingDto[]> {
+    const bookings = await this._bookingRepository.find({
+      relations: {
+        user: true,
+        car: true,
+      },
+      where: { user: { id: userId } },
+    });
+
+    return bookings.map((booking) => new BookingDto(booking));
+  }
+
   async getBookingById(id: string): Promise<BookingDto> {
     const booking = await this._bookingRepository.findOneBy({ id });
 
     if (!booking) throw new NotFoundException('Booking not found');
 
     return new BookingDto(booking);
+  }
+
+  async checkIsOverlap(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<boolean> {
+    const overlap = await this._bookingRepository
+      .createQueryBuilder('booking')
+      .where('booking.user_Id = :userId', { userId })
+      .andWhere('booking.startDate <= :endDate', { endDate })
+      .andWhere('booking.endDate >= :startDate', { startDate })
+      .getOne();
+
+    return !!overlap;
+  }
+
+  private checkUserValidDrivingLicense(
+    user: UserDto,
+    dateRange: Date[],
+  ): boolean {
+    const drivingLicenseExpiry = parseISO(user.drivingLicenseExpiry);
+    return drivingLicenseExpiry >= dateRange[1];
   }
 }

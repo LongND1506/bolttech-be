@@ -1,15 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import {
-  eachDayOfInterval,
-  isEqual,
-  isWithinInterval,
-  subDays,
-} from 'date-fns';
+import { InjectRepository } from '@nestjs/typeorm';
+import { eachDayOfInterval, isEqual, isWithinInterval } from 'date-fns';
+import { Repository } from 'typeorm';
+import { CreatePricingDto } from './dto/create-pricing.dto';
 import { PricingEntity } from './pricing.entity';
 import { Season } from './season.enum';
-import { CreatePricingDto } from './dto/create-pricing.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class PricingService {
@@ -57,8 +52,7 @@ export class PricingService {
         season,
         car: { id: cardId },
       });
-      console.log(price);
-      total += price ? Number(price.price) : 0;
+      total += price ? price.price : 0;
     }
 
     return Number(total.toFixed(2));
@@ -71,7 +65,7 @@ export class PricingService {
   ): Promise<number> {
     const dates = isEqual(startDate, endDate)
       ? [startDate]
-      : eachDayOfInterval({ start: startDate, end: subDays(endDate, 1) });
+      : eachDayOfInterval({ start: startDate, end: endDate });
 
     if (!dates?.length) {
       return 0;
@@ -85,10 +79,10 @@ export class PricingService {
     const year = date.getFullYear();
     return new Map([
       //<[startDate, endDate], season>
-      [[new Date(`${year}-06-01`), new Date(`${year}-09-14}`)], Season.Peak], // Peak: Jun 1 - Sep 14
-      [[new Date(`${year}-03-01`), new Date(`${year}-05-31}`)], Season.Mid], // Mid: Mar 1 - May 31
-      [[new Date(`${year}-09-15`), new Date(`${year}-10-31}`)], Season.Mid], // Mid: Sep 15 - Oct 31
-      [[new Date(`${year}-11-01`), new Date(`${year + 1}-02-29}`)], Season.Off], // Off: Nov 1 - Feb 29 Next Year
+      [[new Date(`${year}-06-01`), new Date(`${year}-09-14`)], Season.Peak], // Peak: Jun 1 - Sep 14
+      [[new Date(`${year}-03-01`), new Date(`${year}-05-31`)], Season.Mid], // Mid: Mar 1 - May 31
+      [[new Date(`${year}-09-15`), new Date(`${year}-10-31`)], Season.Mid], // Mid: Sep 15 - Oct 31
+      [[new Date(`${year}-11-01`), new Date(`${year + 1}-02-29`)], Season.Off], // Off: Nov 1 - Feb 29 Next Year
     ]);
   }
 }

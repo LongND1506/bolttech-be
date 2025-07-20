@@ -11,18 +11,16 @@ import { UserDto } from '../user/dto';
 export class BookingController {
   constructor(private readonly _bookingService: BookingService) {}
 
-  @ApiOperation({ summary: 'Create Booking' })
+  @ApiOperation({ summary: 'Get User Bookings History' })
   @ApiResponse({
-    type: CreateBookingResponseDto,
+    type: [BookingDto],
     status: 200,
+    isArray: true,
   })
   @UseGuards(AuthGuard)
-  @Post()
-  createBooking(
-    @Body() payload: CreateBookingDto,
-    @User() user: UserDto,
-  ): Promise<CreateBookingResponseDto> {
-    return this._bookingService.createBooking(payload, user);
+  @Get('history')
+  getUserBookingsHistory(@User() user: UserDto): Promise<BookingDto[]> {
+    return this._bookingService.getUserBookingsHistory(user.id);
   }
 
   @ApiOperation({ summary: 'Get All Bookings' })
@@ -46,5 +44,19 @@ export class BookingController {
   @Get(':id')
   getBookingById(@Param('id') id: string): Promise<BookingDto> {
     return this._bookingService.getBookingById(id);
+  }
+
+  @ApiOperation({ summary: 'Create Booking' })
+  @ApiResponse({
+    type: CreateBookingResponseDto,
+    status: 200,
+  })
+  @UseGuards(AuthGuard)
+  @Post()
+  createBooking(
+    @Body() payload: CreateBookingDto,
+    @User() user: UserDto,
+  ): Promise<CreateBookingResponseDto> {
+    return this._bookingService.createBooking(payload, user);
   }
 }

@@ -1,4 +1,4 @@
-import { CreatePricingDto } from '@/modules/pricing/dto';
+import { CreatePricingDto } from '../../pricing/dto';
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {

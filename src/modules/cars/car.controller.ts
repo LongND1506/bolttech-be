@@ -24,7 +24,7 @@ export class CarController {
 
   @ApiOperation({ summary: 'Create a new car' })
   @ApiResponse({ type: CarDto, isArray: true, status: 200 })
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Post()
   async createCar(
     @Body() payload: CreateCarDto,

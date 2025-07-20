@@ -1,25 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BookingController } from './booking.controller';
 import { BookingService } from './booking.service';
-import { CreateBookingDto, CreateBookingResponseDto, BookingDto } from './dto';
+import { BookingDto, CreateBookingDto, CreateBookingResponseDto } from './dto';
+import { UserDto } from '../user/dto';
+import { JwtService } from '@nestjs/jwt';
 
 describe('BookingController', () => {
   let controller: BookingController;
   let bookingService: jest.Mocked<BookingService>;
 
-  beforeEach(async () => {
-    const mockBookingService = {
-      createBooking: jest.fn(),
-      getAllBookings: jest.fn(),
-      getBookingById: jest.fn(),
-    } as unknown as jest.Mocked<BookingService>;
+  const mockBookingService = {
+    getUserBookingsHistory: jest.fn(),
+    getAllBookings: jest.fn(),
+    getBookingById: jest.fn(),
+    createBooking: jest.fn(),
+  } as unknown as jest.Mocked<BookingService>;
 
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BookingController],
       providers: [
+        { provide: BookingService, useValue: mockBookingService },
         {
-          provide: BookingService,
-          useValue: mockBookingService,
+          provide: JwtService,
+          useValue: { sign: jest.fn(), verify: jest.fn() },
         },
       ],
     }).compile();
@@ -28,62 +32,56 @@ describe('BookingController', () => {
     bookingService = module.get(BookingService);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('createBooking', () => {
-    it('should call service and return CreateBookingResponseDto', async () => {
-      const dto: CreateBookingDto = {
-        carId: 'car-1',
-        email: 'test@example.com',
-        drivingLicense: 'DL123',
-        drivingLicenseExpiry: '2024-12-31',
-        startDate: '2024-06-01',
-        endDate: '2024-06-10',
-      };
-      const response = new CreateBookingResponseDto('booking-1');
-      bookingService.createBooking.mockResolvedValue(response);
-      await expect(controller.createBooking(dto)).resolves.toEqual(response);
-      expect(bookingService.createBooking).toHaveBeenCalledWith(dto);
+  describe('getUserBookingsHistory', () => {
+    it('should return user bookings history', async () => {
+      const user: UserDto = { id: 'user1' } as any;
+      const bookings: BookingDto[] = [{ id: 'b1' } as BookingDto];
+      bookingService.getUserBookingsHistory.mockResolvedValue(bookings);
+      const result = await controller.getUserBookingsHistory(user);
+      expect(result).toBe(bookings);
+      expect(bookingService.getUserBookingsHistory).toHaveBeenCalledWith(
+        'user1',
+      );
     });
   });
 
   describe('getAllBookings', () => {
-    it('should return an array of BookingDto', async () => {
-      const bookings = [
-        new BookingDto({
-          id: 'booking-1',
-          carId: 'car-1',
-          email: 'test@example.com',
-          drivingLicense: 'DL123',
-          drivingLicenseExpiry: new Date('2024-12-31'),
-          startDate: new Date('2024-06-01'),
-          endDate: new Date('2024-06-10'),
-          totalPrice: 1000,
-        } as any),
-      ];
+    it('should return all bookings', async () => {
+      const bookings: BookingDto[] = [{ id: 'b1' } as BookingDto];
       bookingService.getAllBookings.mockResolvedValue(bookings);
-      await expect(controller.getAllBookings()).resolves.toEqual(bookings);
+      const result = await controller.getAllBookings();
+      expect(result).toBe(bookings);
       expect(bookingService.getAllBookings).toHaveBeenCalled();
     });
   });
 
   describe('getBookingById', () => {
-    it('should return a BookingDto', async () => {
-      const booking = new BookingDto({
-        id: 'booking-1',
-        carId: 'car-1',
-        email: 'test@example.com',
-        drivingLicense: 'DL123',
-        drivingLicenseExpiry: new Date('2024-12-31'),
-        startDate: new Date('2024-06-01'),
-        endDate: new Date('2024-06-10'),
-        totalPrice: 1000,
-      } as any);
+    it('should return booking by id', async () => {
+      const booking: BookingDto = { id: 'b1' } as BookingDto;
       bookingService.getBookingById.mockResolvedValue(booking);
-      await expect(controller.getBookingById('booking-1')).resolves.toEqual(booking);
-      expect(bookingService.getBookingById).toHaveBeenCalledWith('booking-1');
+      const result = await controller.getBookingById('b1');
+      expect(result).toBe(booking);
+      expect(bookingService.getBookingById).toHaveBeenCalledWith('b1');
+    });
+  });
+
+  describe('createBooking', () => {
+    it('should create a booking and return response', async () => {
+      const payload: CreateBookingDto = {
+        carId: 'c1',
+        startDate: '2024-01-01',
+        endDate: '2024-01-02',
+      } as any;
+      const user: UserDto = { id: 'user1' } as any;
+      const response: CreateBookingResponseDto = { id: 'booking1' } as any;
+      bookingService.createBooking.mockResolvedValue(response);
+      const result = await controller.createBooking(payload, user);
+      expect(result).toBe(response);
+      expect(bookingService.createBooking).toHaveBeenCalledWith(payload, user);
     });
   });
 });

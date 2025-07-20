@@ -22,10 +22,16 @@ export class PricingEntity {
   @IsNotEmpty()
   @Column({
     type: 'decimal',
+    precision: 5,
+    scale: 2,
+    transformer: {
+      from: (value: string) => parseFloat(value),
+      to: (value: number) => value,
+    },
   })
   price: number;
 
-  @ManyToOne(() => CarEntity)
+  @ManyToOne(() => CarEntity, (car: CarEntity) => car.pricings)
   @JoinColumn({
     name: 'card_id',
     referencedColumnName: 'id',

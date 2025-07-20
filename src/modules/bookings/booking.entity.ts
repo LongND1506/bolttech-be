@@ -3,7 +3,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CarEntity } from '../cars/car.entity';
@@ -14,15 +14,14 @@ export class BookingEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => CarEntity, (car) => car.id)
+  @ManyToOne(() => CarEntity, (car) => car.bookings)
   @JoinColumn({
     name: 'car_id',
     referencedColumnName: 'id',
   })
   car: CarEntity;
 
-  @IsNotEmpty()
-  @OneToOne(() => UserEntity, (user) => user.id)
+  @ManyToOne(() => UserEntity, (user) => user.bookings)
   @JoinColumn({
     name: 'user_id',
     referencedColumnName: 'id',
@@ -42,6 +41,12 @@ export class BookingEntity {
   @IsNotEmpty()
   @Column({
     type: 'decimal',
+    precision: 5,
+    scale: 2,
+    transformer: {
+      from: (value: string) => parseFloat(value),
+      to: (value: number) => value,
+    },
   })
   totalPrice: number;
 }

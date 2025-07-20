@@ -1,6 +1,13 @@
 import * as bcrypt from 'bcrypt';
 import { IsDate, IsEmail, IsEnum, IsNotEmpty } from 'class-validator';
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { BookingEntity } from '../bookings/booking.entity';
 import { UserRole } from './enums';
 
 @Entity()
@@ -34,6 +41,9 @@ export class UserEntity {
     default: UserRole.User,
   })
   role: UserRole;
+
+  @OneToMany(() => BookingEntity, (booking) => booking.user)
+  bookings: BookingEntity[];
 
   @BeforeInsert()
   async hasPassword() {

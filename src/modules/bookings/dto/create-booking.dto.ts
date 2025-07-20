@@ -3,12 +3,13 @@ import { Transform } from 'class-transformer';
 import {
   IsDateString,
   IsNotEmpty,
+  IsOptional,
   IsString,
-  MinDate,
+  IsUUID,
   Validate,
 } from 'class-validator';
-import { getTomorrowDate } from 'src/shared';
-import { IsAfterStartDate } from '../validators';
+import { parseISO } from 'date-fns';
+import { IsAfterStartDate, IsAfterToday } from '../validators';
 
 export class CreateBookingDto {
   @ApiProperty()
@@ -17,25 +18,25 @@ export class CreateBookingDto {
   carId: string;
 
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
+  @IsOptional()
+  @IsUUID()
   userId: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsDateString()
-  @Transform((field) => new Date(field.value as string))
-  @MinDate(getTomorrowDate(), {
-    message: 'startDate must be at least tomorrow',
+  @Transform((field) => parseISO(field.value as string).toISOString())
+  @Validate(IsAfterToday, {
+    message: 'Start Date must be after today',
   })
   startDate: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsDateString()
-  @Transform(({ value }: { value: string }): Date => new Date(value))
+  @Transform((field) => new Date(field.value as string).toISOString())
   @Validate(IsAfterStartDate, {
-    message: 'endDate must be after startDate',
+    message: 'End Date must be after or equal Start Date',
   })
   endDate: string;
 }

@@ -1,5 +1,5 @@
-import { CarEntity } from '@/modules/cars/car.entity';
-import { PricingEntity } from '@/modules/pricing/pricing.entity';
+import { CarEntity } from 'src/modules/cars/car.entity';
+import { PricingEntity } from 'src/modules/pricing/pricing.entity';
 import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
 import { CARS_MOCK } from '../mocks';
@@ -25,7 +25,6 @@ export default class CarSeeder implements Seeder {
         ...pricing,
         car: newCar,
       }));
-      console.log(pricings);
       await pricingRepository.save(pricings);
     }
   }

@@ -1,5 +1,5 @@
-import { CreateCarDto } from '@/modules/cars/dto';
-import { Season } from '@/modules/pricing/season.enum';
+import { CreateCarDto } from 'src/modules/cars/dto';
+import { Season } from 'src/modules/pricing/season.enum';
 
 export const CARS_MOCK = [
   {

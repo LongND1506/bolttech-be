@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parseISO } from 'date-fns';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { CarEntity } from './car.entity';
 import {
   CarDto,
@@ -20,49 +20,56 @@ export class CarService {
   ) {}
 
   async getCars(payload: CarsQueryDto): Promise<CarDto[]> {
-    const { startDate, endDate } = payload;
-    const cars = await this._carRepository.find();
+    try {
+      const { startDate, endDate } = payload;
 
-    if (!startDate || !endDate) {
-      return cars?.map(
-        (car) =>
-          new CarDto({
-            id: car.id,
-            brand: car.brand,
-            modelName: car.modelName,
-            stock: car.stock,
-            averagePricePerDay: 0,
-            totalPrice: 0,
-          }),
-      );
-    }
+      if (!startDate || !endDate) {
+        const cars = await this._carRepository.find();
 
-    const startDateISO = parseISO(startDate);
-    const endDateISO = parseISO(endDate);
-    const result = <CarDto[]>[];
+        return cars?.map(
+          (car) =>
+            new CarDto({
+              id: car.id,
+              brand: car.brand,
+              modelName: car.modelName,
+              stock: car.stock,
+              averagePricePerDay: 0,
+              totalPrice: 0,
+            }),
+        );
+      }
 
-    for (const car of cars) {
-      const res = new CarDto({
-        id: car.id,
-        brand: car.brand,
-        modelName: car.modelName,
-        stock: car.stock,
-        averagePricePerDay: await this._pricingService.getAveragePricePerDay(
-          startDateISO,
-          endDateISO,
-          car.id,
-        ),
-        totalPrice: await this._pricingService.getTotalPrice(
-          startDateISO,
-          endDateISO,
-          car.id,
-        ),
+      const availableCars = await this._carRepository.find({
+        where: {
+          stock: MoreThan(0),
+        },
+      });
+      const startDateISO = parseISO(startDate);
+      const endDateISO = parseISO(endDate);
+      const carDtoPromises = availableCars.map(async (car) => {
+        const [averagePricePerDay, totalPrice] = await Promise.all([
+          this._pricingService.getAveragePricePerDay(
+            startDateISO,
+            endDateISO,
+            car.id,
+          ),
+          this._pricingService.getTotalPrice(startDateISO, endDateISO, car.id),
+        ]);
+
+        return new CarDto({
+          id: car.id,
+          brand: car.brand,
+          modelName: car.modelName,
+          stock: car.stock,
+          averagePricePerDay,
+          totalPrice,
+        });
       });
 
-      result.push(res);
+      return await Promise.all(carDtoPromises);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
-
-    return result;
   }
 
   async createCar(payload: CreateCarDto): Promise<CreateCarResponseDto> {
