@@ -7,6 +7,11 @@ This is the backend service for the **Bolt Car Rental** system. It is built usin
 
 ---
 
+## Entities Relation Diagram
+<img width="1143" height="779" alt="image" src="https://github.com/user-attachments/assets/3fe6a790-1468-47db-959e-6b000b238223" />
+
+---
+
 ## Prerequisites
 Node.js (v20.19.3 or newer)
 
