@@ -90,6 +90,11 @@ npm install --force
 npm run dev
 ```
 
+## Run with Docker 
+```bash
+npm run docker:build
+npm run docker:run
+```
 ---
 
 ## Scripts
@@ -101,7 +106,9 @@ npm run dev
 - `npm run lint` – Lint the codebase
 - `npm run format` – Format code using Prettier
 - `npm run seed` – Seed the database with initial data
-
+- `npm run docker:build` - Build docker image
+- `npm run docker:run` - Run docker image
+- `npm run docker:rm` - Remove docker container
 ---
 
 ## Testing
