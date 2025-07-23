@@ -18,7 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "npm run build && ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run -d ./src/infrastructures/database/data-source.config.ts"
+    "seed": "npm run build && ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run -d ./src/infrastructures/database/data-source.config.ts",
+    "docker:rm": "docker rm -f bolttech-be",
+    "docker:build": "docker build -t bolttech-be .",
+    "docker:run": "docker run --env-file .env -d -p 3000:3000 --name bolttech-be bolttech-be"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
